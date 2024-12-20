@@ -99,8 +99,9 @@ final class MovieListViewController: UIViewController {
     
     private func setupBindings() {
         viewModel.onMoviesUpdated = { [weak self] in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.collectionView.reloadData()
+                self.collectionView.reloadData()
             }
         }
         

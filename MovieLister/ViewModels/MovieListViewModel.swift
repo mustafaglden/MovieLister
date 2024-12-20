@@ -24,14 +24,15 @@ final class MovieListViewModel {
     func fetchMovies() {
         guard currentPage <= totalPages else { return }
         TMDBService.shared.fetchPopularMovies(page: currentPage) { [weak self] result in
+            guard let self else { return }
             switch result {
             case .success(let response):
-                self?.totalPages = response.totalPages
-                self?.allMovies.append(contentsOf: response.results)
-                self?.onMoviesUpdated?()
-                self?.currentPage += 1
+                self.totalPages = response.totalPages
+                self.allMovies.append(contentsOf: response.results)
+                self.onMoviesUpdated?()
+                self.currentPage += 1
             case .failure(let error):
-                self?.onError?(error)
+                self.onError?(error)
             }
         }
     }

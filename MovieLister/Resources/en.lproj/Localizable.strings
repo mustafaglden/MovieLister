@@ -14,7 +14,7 @@
 "first_title" = "Contents";
 "second_title" = "Content Details";
 
-"image_success" = "Image uploaded successfully.";
+"image_success" = "Image uploaded successfully. Movie added to favorites.";
 "success_title" = "Success!!";
 
 "search_placeholder" = "Search movies...";

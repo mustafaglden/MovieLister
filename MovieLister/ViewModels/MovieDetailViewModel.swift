@@ -23,12 +23,13 @@ final class MovieDetailViewModel {
     
     func fetchMovieDetail() {
         TMDBService.shared.fetchMovieDetail(movieId: movieId) { [weak self] result in
+            guard let self else { return }
             switch result {
             case .success(let movie):
-                self?.movie = movie
-                self?.onMovieFetched?()
+                self.movie = movie
+                self.onMovieFetched?()
             case .failure(let error):
-                self?.onError?(error)
+                self.onError?(error)
             }
         }
     }
@@ -49,10 +50,10 @@ final class MovieDetailViewModel {
         ImageUploadService.shared.uploadImage(base64String: base64String, prompt: "upload_prompt".localized) { result in
             switch result {
             case .success(let response):
-                print("Upload successful: \(response)")
+                // Loading indicator test.
+//                Thread.sleep(forTimeInterval: 3)
                 self.onImageUpload?()
             case .failure(let error):
-                print("Upload failed: \(error.localizedDescription)")
                 self.onError?(error)
             }
         }

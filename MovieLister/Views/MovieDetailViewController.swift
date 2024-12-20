@@ -8,7 +8,7 @@
 import UIKit
 
 final class MovieDetailViewController: UIViewController {
-    
+    //MARK: - UI Elements
     private var starButton = UIButton()
     private let posterImage = UIImageView()
     private let descriptionLabel = UILabel()
@@ -26,6 +26,7 @@ final class MovieDetailViewController: UIViewController {
         }
     }
     
+    //MARK: - View Setup
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -44,9 +45,6 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func setupViews() {
-        guard let imageUrl = URL(string: viewModel.movie.posterURL) else {
-            return
-        }
         view.addSubview(posterImage)
         view.addSubview(titleLabel)
         view.addSubview(descriptionLabel)
@@ -102,34 +100,48 @@ final class MovieDetailViewController: UIViewController {
 
     private func setupBindings() {
         viewModel.onMovieFetched = { [weak self] in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.spinnerView.hide()
-                self?.updateUI()
+                self.spinnerView.hide()
+                self.updateUI()
             }
         }
         
         viewModel.onFavoriteUpdated = { [weak self] in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.spinnerView.hide()
-                self?.updateStarButton()
+                self.updateStarButton()
             }
         }
 
         viewModel.onImageUpload = { [weak self] in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.spinnerView.hide()
-                self?.showAlert("image_success".localized, title: "success_title".localized)
+                self.spinnerView.hide()
+                self.showAlert("image_success".localized, title: "success_title".localized)
             }
         }
 
         viewModel.onError = { [weak self] error in
+            guard let self else { return }
             DispatchQueue.main.async {
-                self?.spinnerView.hide()
-                self?.showAlert("\(error.localizedDescription)")
+                self.spinnerView.hide()
+                self.showAlert("\(error.localizedDescription)")
             }
-            print("Error: \(error)")
         }
     }
+    
+    private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
+        let aspectWidth = targetSize.width / image.size.width
+        let aspectHeight = targetSize.height / image.size.height
+        let scaleFactor = min(aspectWidth, aspectHeight)
+        let newSize = CGSize(width: image.size.width * scaleFactor, height: image.size.height * scaleFactor)
+        let renderer = UIGraphicsImageRenderer(size: newSize)
+        return renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: newSize))
+        }
+    }
+
     
     private func convertImageToBase64(image: UIImage) -> String? {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else { return nil }
@@ -150,13 +162,14 @@ final class MovieDetailViewController: UIViewController {
         }
         updateStarButton()
     }
-
+    // MARK: - objc functions
     @objc private func toggleFavorite() {
         self.spinnerView.show(on: self.view)
         guard let image = posterImage.image else {
             return
         }
-        guard let base64String = convertImageToBase64(image: image) else { return }
+        guard let resizedImage = resizeImage(image: image, targetSize: CGSize(width: 600, height: 600)) else { return }
+        guard let base64String = convertImageToBase64(image: resizedImage) else { return }
         viewModel?.toggleFavorite(base64String: base64String)
     }
 }

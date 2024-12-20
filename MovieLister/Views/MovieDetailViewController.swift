@@ -18,10 +18,10 @@ final class MovieDetailViewController: UIViewController {
 
     private var viewModel: MovieDetailViewModel!
     
-    public var movie: MovieModel? {
+    var movieId: Int? {
         didSet {
-            if let movie = movie {
-                self.viewModel = MovieDetailViewModel(movie: movie)
+            if let movieId = movieId {
+                self.viewModel = MovieDetailViewModel(movieId: movieId)
             }
         }
     }
@@ -29,10 +29,18 @@ final class MovieDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        title = "second_title".localized
+        
         view.backgroundColor = .white
         setupStarButton()
         setupViews()
         setupBindings()
+        updateStarButton()
+        
+        if movieId != nil {
+            spinnerView.show(on: view)
+            viewModel.fetchMovieDetail()
+        }
     }
 
     private func setupViews() {
@@ -44,25 +52,21 @@ final class MovieDetailViewController: UIViewController {
         view.addSubview(descriptionLabel)
         view.addSubview(voteCountLabel)
         
-        posterImage.loadImage(from: imageUrl, placeholder: UIImage(named: "placeholder"))
         posterImage.contentMode = .scaleToFill
         posterImage.clipsToBounds = true
         posterImage.translatesAutoresizingMaskIntoConstraints = false
         
-        titleLabel.text = viewModel.movie.title
         titleLabel.textAlignment = .left
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        descriptionLabel.text = viewModel.movie.overview
         descriptionLabel.textAlignment = .left
         descriptionLabel.numberOfLines = 10
         descriptionLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        voteCountLabel.text = "\(viewModel.movie.voteCount)"
         voteCountLabel.textAlignment = .right
-        voteCountLabel.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        voteCountLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         voteCountLabel.translatesAutoresizingMaskIntoConstraints = false
         
         
@@ -97,8 +101,16 @@ final class MovieDetailViewController: UIViewController {
     }
 
     private func setupBindings() {
+        viewModel.onMovieFetched = { [weak self] in
+            DispatchQueue.main.async {
+                self?.spinnerView.hide()
+                self?.updateUI()
+            }
+        }
+        
         viewModel.onFavoriteUpdated = { [weak self] in
             DispatchQueue.main.async {
+                self?.spinnerView.hide()
                 self?.updateStarButton()
             }
         }
@@ -106,15 +118,14 @@ final class MovieDetailViewController: UIViewController {
         viewModel.onImageUpload = { [weak self] in
             DispatchQueue.main.async {
                 self?.spinnerView.hide()
-                self?.showAlert("Image uploaded successfully.", title: "Success!!")
+                self?.showAlert("image_success".localized, title: "success_title".localized)
             }
-            print("Image uploaded successfully!")
         }
 
         viewModel.onError = { [weak self] error in
             DispatchQueue.main.async {
                 self?.spinnerView.hide()
-                self?.showAlert("\(error.localizedDescription)", title: "Error!")
+                self?.showAlert("\(error.localizedDescription)")
             }
             print("Error: \(error)")
         }
@@ -128,6 +139,16 @@ final class MovieDetailViewController: UIViewController {
     private func updateStarButton() {
         let isFavorite = CoreDataManager.shared.isFavorite(movieId: viewModel.movie.id)
         starButton.setImage(UIImage(systemName: isFavorite ? "star.fill" : "star"), for: .normal)
+    }
+    
+    private func updateUI() {
+        titleLabel.text = viewModel.movie.title
+        descriptionLabel.text = viewModel.movie.overview
+        voteCountLabel.text = "Vote Count: \(viewModel.movie.voteCount)"
+        if let imageUrl = URL(string: viewModel.movie.posterURL) {
+            posterImage.loadImage(from: imageUrl, placeholder: UIImage(named: "placeholder"))
+        }
+        updateStarButton()
     }
 
     @objc private func toggleFavorite() {

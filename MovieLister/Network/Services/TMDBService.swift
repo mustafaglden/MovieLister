@@ -13,7 +13,6 @@ final class TMDBService {
 
     func fetchPopularMovies(page: Int, completion: @escaping (Result<MovieResponseModel, Error>) -> Void) {
         let endpoint = APIEndpoint.popularMovies(page: page)
-        print("FetchMovies-TMDBService")
         NetworkManager.shared.request(endpoint: endpoint, completion: completion)
     }
 

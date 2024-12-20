@@ -21,12 +21,12 @@ struct APIEndpoint {
 
     static func popularMovies(page: Int) -> APIEndpoint {
         APIEndpoint(
-            baseUrl: "https://api.themoviedb.org/3/",
+            baseUrl: NetworkConstants.tmdbHost,
             path: "movie/popular?page=\(page)",
             method: .get,
             headers: [
-                "accept" : "application/json",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3YjRiN2U4NTMzNGU2NGI0MDBhNWM5OGJlNzI0YjI4OSIsInN1YiI6IjY2NTQ5NzhmYTJjMzBhYTZhODliODFiOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.oLjGkyl7pjiEifZbsyqYBs_XJhlAFBGjpR-0tyVFv9A"
+                NetworkConstants.defaultContentTypeKey : NetworkConstants.defaultContentType,
+                NetworkConstants.authTypeKey : NetworkConstants.accessTokenAuth
             ],
             body: nil
         )
@@ -34,12 +34,12 @@ struct APIEndpoint {
 
     static func movieDetail(movieId: Int) -> APIEndpoint {
         APIEndpoint(
-            baseUrl: "https://api.themoviedb.org/3/",
+            baseUrl: NetworkConstants.tmdbHost,
             path: "movie/\(movieId)",
             method: .get,
             headers: [
-                "accept" : "application/json",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3YjRiN2U4NTMzNGU2NGI0MDBhNWM5OGJlNzI0YjI4OSIsInN1YiI6IjY2NTQ5NzhmYTJjMzBhYTZhODliODFiOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.oLjGkyl7pjiEifZbsyqYBs_XJhlAFBGjpR-0tyVFv9A"
+                NetworkConstants.defaultContentTypeKey : NetworkConstants.defaultContentType,
+                NetworkConstants.authTypeKey : NetworkConstants.accessTokenAuth
             ],
             body: nil
         )
@@ -47,12 +47,12 @@ struct APIEndpoint {
     
     static func uploadImage() -> APIEndpoint {
         APIEndpoint(
-            baseUrl: "https://www.nftcalculatorsapp.net/",
-            path: "text_to_image_case_study",
+            baseUrl: NetworkConstants.imageHost,
+            path: NetworkConstants.imageUploadPath,
             method: .post,
             headers: [
-                "accept": "application/json",
-                "Content-Type": "application/json"
+                NetworkConstants.defaultContentTypeKey : NetworkConstants.defaultContentType,
+                NetworkConstants.contentTypeKey : NetworkConstants.defaultContentType
             ],
             body: nil
         )

@@ -81,8 +81,9 @@ final class MovieListCollectionCell: UICollectionViewCell {
     }
     
     // MARK: - Configure Cell
-    func configure(with image: URL, title: String) {
+    func configure(with image: URL, title: String, showStar: Bool = false) {
         backgroundImageView.loadImage(from: image, placeholder: UIImage(named: "placeholder"))
+        starImageView.isHidden = !showStar
         titleLabel.text = title
     }
 }

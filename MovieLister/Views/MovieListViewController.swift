@@ -9,9 +9,7 @@ import UIKit
 
 final class MovieListViewController: UIViewController {
     
-    private let tableView = UITableView()
-    private let tableReuseIdentifier = "MovieListTableCell"
-    
+    // MARK: - UI Elements
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -19,35 +17,36 @@ final class MovieListViewController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         return collectionView
     }()
-    private let collectionReuseIdentifier = "MovieListCollectionCell"
-    
-    private var isTableView: Bool = true
     private var searchBar = UISearchBar()
     private let searchBarContainer = UIView()
     
     private var viewModel = MovieListViewModel()
     
+    private var isSingleLayout: Bool = true
+        
+    // MARK: - View Setup
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        title = "Contents"
-
-        tableView.alpha = 0
-        collectionView.alpha = 1
+        title = "first_title".localized
         
         setupSwitchViewButton()
         setupSearchBar()
-        setupTableView()
         setupCollectionView()
         setupBindings()
         viewModel.fetchMovies()
         // Do any additional setup after loading the view.
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        collectionView.reloadData()
+    }
+    
     private func setupSwitchViewButton() {
         let customButton = UIButton(type: .system)
-        customButton.setImage(UIImage(systemName: isTableView ? "line.3.horizontal" : "square.grid.2x2.fill"), for: .normal)
+        customButton.setImage(UIImage(systemName: "square.grid.2x2.fill"), for: .normal)
         customButton.backgroundColor = .lightGray
         customButton.tintColor = .white
         customButton.layer.cornerRadius = 8
@@ -59,7 +58,7 @@ final class MovieListViewController: UIViewController {
     
     private func setupSearchBar() {
         searchBar.delegate = self
-        searchBar.placeholder = "Search movies..."
+        searchBar.placeholder = "search_placeholder".localized
         searchBarContainer.translatesAutoresizingMaskIntoConstraints = false
         searchBarContainer.backgroundColor = .white
         searchBar.translatesAutoresizingMaskIntoConstraints = false
@@ -72,35 +71,21 @@ final class MovieListViewController: UIViewController {
             searchBarContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBarContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             searchBarContainer.heightAnchor.constraint(equalToConstant: 40),
-                    
+            
             searchBar.topAnchor.constraint(equalTo: searchBarContainer.topAnchor),
             searchBar.leadingAnchor.constraint(equalTo: searchBarContainer.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: searchBarContainer.trailingAnchor),
             searchBar.bottomAnchor.constraint(equalTo: searchBarContainer.bottomAnchor)
         ])
     }
-
-    private func setupTableView() {
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(MovieListTableCell.self, forCellReuseIdentifier: tableReuseIdentifier)
-        
-        view.addSubview(tableView)
-                
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: searchBarContainer.bottomAnchor, constant: 8),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 8),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8)
-        ])
-    }
     
     private func setupCollectionView() {
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.register(MovieListCollectionCell.self, forCellWithReuseIdentifier: collectionReuseIdentifier)
+        collectionView.register(MovieListCollectionCell.self, forCellWithReuseIdentifier: "MovieListCollectionCell")
+        collectionView.register(CollectionViewButton.self, forCellWithReuseIdentifier: "CollectionViewButton")
         collectionView.backgroundColor = .white
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 60, right: 0)
         
         view.addSubview(collectionView)
         
@@ -115,75 +100,72 @@ final class MovieListViewController: UIViewController {
     private func setupBindings() {
         viewModel.onMoviesUpdated = { [weak self] in
             DispatchQueue.main.async {
-                self?.tableView.reloadData()
                 self?.collectionView.reloadData()
             }
         }
-
+        
         viewModel.onError = { error in
             print("Error: \(error)")
         }
     }
+
+    private func updateCollectionViewLayout() {
+        if let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.invalidateLayout()
+        }
+    }
     
+    //MARK: objc functions
     @objc func changeViewTapped() {
-        isTableView.toggle()
-        if isTableView {
-            tableView.alpha = 0
-            collectionView.alpha = 1
-        } else {
-            tableView.alpha = 1
-            collectionView.alpha = 0
+        isSingleLayout.toggle()
+        let buttonImage = UIImage(systemName: isSingleLayout ? "rectangle.grid.1x2.fill" : "square.grid.2x2.fill")
+        if let customButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
+            customButton.setImage(buttonImage, for: .normal)
         }
+        updateCollectionViewLayout()
+    }
+    
+    @objc func loadMoreTapped() {
+        viewModel.fetchMovies()
     }
 }
 
-extension MovieListViewController: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.movies.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: tableReuseIdentifier, for: indexPath) as? MovieListTableCell else {
-            return UITableViewCell()
-        }
-        if let imageUrl = URL(string: viewModel.movies[indexPath.row].posterURL) {
-            cell.configure(with: imageUrl, title: viewModel.movies[indexPath.row].title)
-        }
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        UITableView.automaticDimension
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let detailVC = MovieDetailViewController()
-        detailVC.movie = viewModel.movies[indexPath.row]
-        self.navigationController?.pushViewController(detailVC, animated: true)
-    }
-    
-}
-
+// MARK: - Extensions
 extension MovieListViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel.movies.count
+        return viewModel.movies.count + 1
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: collectionReuseIdentifier, for: indexPath) as? MovieListCollectionCell else {
-            return UICollectionViewCell()
+        if indexPath.row < viewModel.movies.count {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "MovieListCollectionCell", for: indexPath) as? MovieListCollectionCell else {
+                return UICollectionViewCell()
+            }
+            if let imageUrl = URL(string: viewModel.movies[indexPath.row].posterURL) {
+                if CoreDataManager.shared.isFavorite(movieId: viewModel.movies[indexPath.row].id) {
+                    cell.configure(with: imageUrl, title: viewModel.movies[indexPath.row].title, showStar: true)
+                } else {
+                    cell.configure(with: imageUrl, title: viewModel.movies[indexPath.row].title, showStar: false)
+                }
+            }
+            cell.layer.cornerRadius = 10
+            cell.layer.masksToBounds = true
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CollectionViewButton", for: indexPath) as! CollectionViewButton
+            cell.button.setTitle("load_button_title".localized, for: .normal)
+            cell.button.addTarget(self, action: #selector(loadMoreTapped), for: .touchUpInside)
+            return cell
         }
-        if let imageUrl = URL(string: viewModel.movies[indexPath.row].posterURL) {
-            cell.configure(with: imageUrl, title: viewModel.movies[indexPath.row].title)
-        }
-        cell.layer.cornerRadius = 10
-        cell.layer.masksToBounds = true
-        return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.frame.width - 16) / 2
-        return CGSize(width: width, height: 150)
+        if indexPath.row < viewModel.movies.count {
+            let width = isSingleLayout ? collectionView.frame.width - 16 : (collectionView.frame.width / 2) - 12
+            return CGSize(width: width, height: isSingleLayout ? 300 : 200)
+        } else {
+            return CGSize(width: collectionView.frame.width - 20, height: 60)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -195,9 +177,11 @@ extension MovieListViewController: UICollectionViewDelegateFlowLayout, UICollect
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let detailVC = MovieDetailViewController()
-        detailVC.movie = viewModel.movies[indexPath.row]
-        self.navigationController?.pushViewController(detailVC, animated: true)
+        if indexPath.row < viewModel.movies.count {
+            let detailVC = MovieDetailViewController()
+            detailVC.movieId = viewModel.movies[indexPath.row].id
+            self.navigationController?.pushViewController(detailVC, animated: true)
+        }
     }
 }
 

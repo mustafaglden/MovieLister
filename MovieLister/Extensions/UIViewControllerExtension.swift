@@ -10,8 +10,8 @@ import UIKit
 extension UIViewController {
     func showAlert(
         _ message: String,
-        title: String = "Error",
-        actionButtonTitle: String = "Okey",
+        title: String = "error".localized,
+        actionButtonTitle: String = "ok".localized,
         actionButtonHandler: (() -> Void)? = nil
     ) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)

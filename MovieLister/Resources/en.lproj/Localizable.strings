@@ -5,3 +5,19 @@
   Created by Mustafa on 20.12.2024.
   
 */
+//MARK: Localizable strings.
+"error" = "Error!";
+"ok" = "Okey";
+
+"upload_prompt" = "Movie Image Upload";
+
+"first_title" = "Contents";
+"second_title" = "Content Details";
+
+"image_success" = "Image uploaded successfully.";
+"success_title" = "Success!!";
+
+"search_placeholder" = "Search movies...";
+
+"load_button_title" = "Load More Movies";
+

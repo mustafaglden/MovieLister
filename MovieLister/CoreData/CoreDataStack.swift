@@ -17,7 +17,7 @@ final class CoreDataManager {
     }()
     
     private lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "MovieLister") 
+        let container = NSPersistentContainer(name: "MovieLister")
         container.loadPersistentStores { _, error in
             if let error = error {
                 fatalError("Unresolved error \(error)")
@@ -68,13 +68,4 @@ final class CoreDataManager {
         
         return (try? context.count(for: fetchRequest)) ?? 0 > 0
     }
-    
-    func fetchFavorites() -> [CoreDataMovie] {
-        let context = CoreDataManager.shared.context
-        let fetchRequest: NSFetchRequest<CoreDataMovie> = CoreDataMovie.fetchRequest()
-        
-        return (try? context.fetch(fetchRequest)) ?? []
-    }
-
-
 }

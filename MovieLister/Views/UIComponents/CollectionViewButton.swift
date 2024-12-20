@@ -1,5 +1,5 @@
 //
-//  ButtonCell.swift
+//  CollectionViewButton.swift
 //  MovieLister
 //
 //  Created by Mustafa on 19.12.2024.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ButtonCell: UICollectionViewCell, UITableViewCell {
+final class CollectionViewButton: UICollectionViewCell {
     let button: UIButton = {
         let button = UIButton(type: .system)
         button.setTitleColor(.white, for: .normal)

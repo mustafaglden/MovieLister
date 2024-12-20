@@ -14,10 +14,10 @@ struct MovieModel: Decodable, Identifiable {
     let voteCount: Int
 
     var posterURL: String {
-        return "https://image.tmdb.org/t/p/w200\(posterPath)"
+        return NetworkConstants.posterUrl + posterPath
     }
     
-    var isFavorite: Bool = false 
+    var isFavorite: Bool = false
 
     enum CodingKeys: String, CodingKey {
         case id

@@ -8,11 +8,11 @@
 import Foundation
 
 final class MovieListViewModel {
-    private var currentPage = 1
-    private var totalPages = 1
     private var allMovies: [MovieModel] = []
     private var filteredMovies: [MovieModel] = []
-    var favorites: [Int] = [] // Stores favorite movie IDs
+    
+    var currentPage = 1
+    var totalPages = 1
 
     var movies: [MovieModel] {
         filteredMovies.isEmpty ? allMovies : filteredMovies
@@ -20,14 +20,13 @@ final class MovieListViewModel {
 
     var onMoviesUpdated: (() -> Void)?
     var onError: ((Error) -> Void)?
-
+    
     func fetchMovies() {
         guard currentPage <= totalPages else { return }
-        print("FetchMovies viewModel")
         TMDBService.shared.fetchPopularMovies(page: currentPage) { [weak self] result in
             switch result {
             case .success(let response):
-                self?.totalPages = response.page
+                self?.totalPages = response.totalPages
                 self?.allMovies.append(contentsOf: response.results)
                 self?.onMoviesUpdated?()
                 self?.currentPage += 1
@@ -42,20 +41,5 @@ final class MovieListViewModel {
             $0.title.lowercased().contains(query.lowercased())
         }
         onMoviesUpdated?()
-    }
-
-    func toggleFavorite(movie: MovieModel) {
-        if let index = favorites.firstIndex(of: movie.id) {
-            favorites.remove(at: index)
-            CoreDataManager.shared.removeFavorite(movieId: movie.id)
-        } else {
-            favorites.append(movie.id)
-            CoreDataManager.shared.saveFavorite(movie: movie)
-        }
-        onMoviesUpdated?()
-    }
-
-    func isFavorite(movieId: Int) -> Bool {
-        return favorites.contains(movieId)
     }
 }

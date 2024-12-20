@@ -119,7 +119,7 @@ final class MovieListViewController: UIViewController {
     //MARK: objc functions
     @objc func changeViewTapped() {
         isSingleLayout.toggle()
-        let buttonImage = UIImage(systemName: isSingleLayout ? "rectangle.grid.1x2.fill" : "square.grid.2x2.fill")
+        let buttonImage = UIImage(systemName: isSingleLayout ? "square.grid.2x2.fill" : "rectangle.grid.1x2.fill")
         if let customButton = navigationItem.rightBarButtonItem?.customView as? UIButton {
             customButton.setImage(buttonImage, for: .normal)
         }

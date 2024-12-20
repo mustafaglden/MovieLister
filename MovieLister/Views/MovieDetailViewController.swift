@@ -110,15 +110,18 @@ final class MovieDetailViewController: UIViewController {
         viewModel.onFavoriteUpdated = { [weak self] in
             guard let self else { return }
             DispatchQueue.main.async {
+                self.spinnerView.hide()
                 self.updateStarButton()
+                self.showAlert("remove_favorite".localized, title: "success_title".localized)
             }
         }
 
-        viewModel.onImageUpload = { [weak self] in
+        viewModel.onImageUpload = { [weak self] response in
             guard let self else { return }
             DispatchQueue.main.async {
                 self.spinnerView.hide()
-                self.showAlert("image_success".localized, title: "success_title".localized)
+                self.updateStarButton()
+                self.showAlert("image_success".localized, title: response)
             }
         }
 

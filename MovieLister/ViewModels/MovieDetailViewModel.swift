@@ -12,7 +12,7 @@ final class MovieDetailViewModel {
     private let movieId: Int
 
     var onFavoriteUpdated: (() -> Void)?
-    var onImageUpload: (() -> Void)?
+    var onImageUpload: ((String) -> Void)?
     var onError: ((Error) -> Void)?
     var onMovieFetched: (() -> Void)?
 
@@ -38,12 +38,12 @@ final class MovieDetailViewModel {
         if CoreDataManager.shared.isFavorite(movieId: movie.id) {
             CoreDataManager.shared.removeFavorite(movieId: movie.id)
             movie.isFavorite = true
+            onFavoriteUpdated?()
         } else {
             CoreDataManager.shared.saveFavorite(movie: movie)
             uploadMovieImage(base64String: base64String)
             movie.isFavorite = false
         }
-        onFavoriteUpdated?()
     }
 
     private func uploadMovieImage(base64String: String) {
@@ -52,7 +52,7 @@ final class MovieDetailViewModel {
             case .success(let response):
                 // Loading indicator test.
 //                Thread.sleep(forTimeInterval: 3)
-                self.onImageUpload?()
+                self.onImageUpload?(response.responseMessage)
             case .failure(let error):
                 self.onError?(error)
             }

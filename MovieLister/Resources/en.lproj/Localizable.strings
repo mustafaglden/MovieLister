@@ -17,6 +17,8 @@
 "image_success" = "Image uploaded successfully. Movie added to favorites.";
 "success_title" = "Success!!";
 
+"remove_favorite" = "Movie removed from favorites.";
+
 "search_placeholder" = "Search movies...";
 
 "load_button_title" = "Load More Movies";
